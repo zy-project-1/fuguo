@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>多身份登录注册</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            background:#f5f7fa;
+            font-family:微软雅黑;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+        }
+        .container{
+            width:420px;
+            background:#fff;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0 0 15px #00000015;
+        }
+        /* 身份选项卡 */
+        .tab{
+            display:flex;
+            margin-bottom:25px;
+            border-bottom:1px solid #eee;
+        }
+        .tab-item{
+            flex:1;
+            text-align:center;
+            line-height:40px;
+            cursor:pointer;
+        }
+        .tab-item.active{
+            color:#27ae60;
+            border-bottom:2px solid #27ae60;
+        }
+        /* 登录注册切换 */
+        .switch{
+            text-align:right;
+            margin-bottom:15px;
+        }
+        .switch span{
+            color:#27ae60;
+            cursor:pointer;
+        }
+        input,select{
+            width:100%;
+            height:45px;
+            padding:0 15px;
+            margin-bottom:15px;
+            border:1px solid #ddd;
+            border-radius:5px;
+            outline:none;
+        }
+        .btn{
+            width:100%;
+            height:45px;
+            background:#27ae60;
+            color:#fff;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            font-size:16px;
+        }
+        .hide{display:none;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 身份选择：企业 / 商户 / 农户 -->
+    <div class="tab">
+        <div class="tab-item active" data-type="company">企业</div>
+        <div class="tab-item" data-type="shop">商户</div>
+        <div class="tab-item" data-type="farmer">农户</div>
+    </div>
+
+    <!-- 登录区域 -->
+    <div class="login-box">
+        <div class="switch">没有账号？<span id="toReg">去注册</span></div>
+        <input type="text" id="loginUser" placeholder="请输入账号">
+        <input type="password" id="loginPwd" placeholder="请输入密码">
+        <button class="btn" id="loginBtn">立即登录</button>
+    </div>
+
+    <!-- 注册区域 默认隐藏 -->
+    <div class="reg-box hide">
+        <div class="switch">已有账号？<span id="toLogin">去登录</span></div>
+        <input type="text" id="regUser" placeholder="请设置账号">
+        <input type="password" id="regPwd" placeholder="请设置密码">
+        <button class="btn" id="regBtn">立即注册</button>
+    </div>
+</div>
+
+<script>
+    // 当前选中身份
+    let userType = "company";
+
+    // 身份切换
+    const tabItems = document.querySelectorAll(".tab-item");
+    tabItems.forEach(item=>{
+        item.onclick = function(){
+            tabItems.forEach(i=>i.classList.remove("active"));
+            this.classList.add("active");
+            userType = this.dataset.type;
+        }
+    })
+
+    // 登录注册盒子切换
+    const loginBox = document.querySelector(".login-box");
+    const regBox = document.querySelector(".reg-box");
+    document.getElementById("toReg").onclick = ()=>{
+        loginBox.classList.add("hide");
+        regBox.classList.remove("hide");
+    }
+    document.getElementById("toLogin").onclick = ()=>{
+        regBox.classList.add("hide");
+        loginBox.classList.remove("hide");
+    }
+
+    // 注册
+    document.getElementById("regBtn").onclick = function(){
+        let username = document.getElementById("regUser").value.trim();
+        let pwd = document.getElementById("regPwd").value.trim();
+        if(!username||!pwd){
+            alert("账号密码不能为空");
+            return;
+        }
+        // 本地存储账号+身份
+        localStorage.setItem("acc_"+username, JSON.stringify({pwd,type:userType}));
+        alert("注册成功，自动跳转登录！");
+        // 注册完切回登录
+        regBox.classList.add("hide");
+        loginBox.classList.remove("hide");
+    }
+
+    // 登录 + 跳转对应页面
+    document.getElementById("loginBtn").onclick = function(){
+        let username = document.getElementById("loginUser").value.trim();
+        let pwd = document.getElementById("loginPwd").value.trim();
+        let userInfo = localStorage.getItem("acc_"+username);
+        if(!userInfo){
+            alert("账号不存在，请先注册");
+            return;
+        }
+        let info = JSON.parse(userInfo);
+        if(info.pwd !== pwd){
+            alert("密码错误");
+            return;
+        }
+        // 登录成功，按身份跳转
+        alert("登录成功，正在跳转...");
+        switch(info.type){
+            case "company":
+                // 跳企业页面
+                window.location.href = "company.html";
+                break;
+            case "shop":
+                // 跳商户页面
+                window.location.href = "shop.html";
+                break;
+            case "farmer":
+                // 跳农户页面
+                window.location.href = "farmer.html";
+                break;
+        }
+    }
+</script>
+</body>
+</html>
